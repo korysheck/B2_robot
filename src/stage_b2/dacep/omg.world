@@ -1,0 +1,66 @@
+include "map.inc"
+
+define hokuyo ranger
+(
+	sensor( 			
+        range [ 0.0  30.0 ]
+        fov 70.25
+        samples 5
+    )
+
+    # generic model properties
+    color "black"
+    size [ 0.05 0.05 0.1 ]
+)
+
+define dacep position
+(
+  #size [0.415 0.392 0.25]
+  size [1 1 0.25]
+  origin [-0.05 0 0 0]
+  #
+  # simplified Body shape:
+  block( 
+	points 6
+	point[0] [0.75 0]
+	point[1] [1 0.25]
+	point[2] [1 0.75]
+	point[3] [0.75 1]
+	point[4] [0 1]
+	point[5] [0 0]
+	z [0 1]
+  )
+
+  gui_nose 1
+  drive "diff"
+  hokuyo(pose [ 0.050 0.000 0 0.000 ])
+)
+
+# set the resolution of the underlying raytrace model in meters
+resolution 0.02
+
+interval_sim 100  # simulation timestep in milliseconds
+
+
+# configure the GUI window
+window
+(
+  size [ 635.000 666.000 ] # in pixels
+  scale 36.995   # pixels per meter
+  			
+  show_data 1              # 1=on 0=off
+)
+
+# load an environment bitmap
+floorplan
+( 
+  size [16.000 16.000 0.800] # in meters
+  bitmap "cave.png"
+)
+
+# throw in a robot
+dacep( 
+    name "dacep"
+    pose [ -3 0 0 0 ]  
+    color "blue"
+)

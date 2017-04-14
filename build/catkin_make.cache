@@ -1,0 +1,2 @@
+dacep:model_b2:navigace:robot_setup_tf
+-DCATKIN_DEVEL_PREFIX=/home/korys/catkin_navib2/devel -DCMAKE_INSTALL_PREFIX=/home/korys/catkin_navib2/install -G Unix Makefiles

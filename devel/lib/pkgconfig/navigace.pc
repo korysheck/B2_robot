@@ -1,0 +1,8 @@
+prefix=/home/korys/catkin_navib2/devel
+
+Name: navigace
+Description: Description of navigace
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/korys/catkin_navib2/devel/lib 
+Requires: 

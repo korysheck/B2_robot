@@ -1,0 +1,32 @@
+local_costmap:
+  global_frame: /odom
+  robot_base_frame: /base_link
+  update_frequency: 8.0
+  transform_tolerance: 0.5
+  publish_frequency: 8.0
+  static_map: false
+  rolling_window: true
+  width: 4
+  height: 4
+  resolution: 0.035
+  transform_tolerance: 0.5
+  inf_is_valid: true
+  obstacle_range: 1.0
+  raytrace_range: 1.0
+  footprint: [[-0.135,-0.25],[0.35, -0.25], [0.505,-0.15], [0.505, 0.15], [0.35, 0.25], [-0.135, 0.25]]
+  footprint_padding: 0.05
+  robot_radius: 1.0
+  inflation_radius: 0.04
+  cost_scaling_factor: 26.0
+  max_obstacle_height: 0.6
+  min_obstacle_height: 0.08
+  observation_sources: laser_scan_sensor sonar1 sonar2 sonar3 sonar4 sonar5 sonar6 sonar7 sonar8
+  laser_scan_sensor: {sensor_frame: laser, data_type: LaserScan, topic: /scan, marking: true, clearing: true}
+  sonar1: {sensor_frame: SRF08_1, data_type: LaserScan, topic: /SRF08_1, marking: true, clearing: true}
+  sonar2: {sensor_frame: SRF08_2, data_type: LaserScan, topic: /SRF08_2, marking: true, clearing: true}
+  sonar3: {sensor_frame: SRF08_3, data_type: LaserScan, topic: /SRF08_3, marking: true, clearing: true}
+  sonar4: {sensor_frame: SRF08_4, data_type: LaserScan, topic: /SRF08_4, marking: true, clearing: true}
+  sonar5: {sensor_frame: SRF08_5, data_type: LaserScan, topic: /SRF08_5, marking: true, clearing: true}
+  sonar6: {sensor_frame: SRF08_6, data_type: LaserScan, topic: /SRF08_6, marking: true, clearing: true}
+  sonar7: {sensor_frame: SRF08_7, data_type: LaserScan, topic: /SRF08_7, marking: true, clearing: true}
+  sonar8: {sensor_frame: SRF08_8, data_type: LaserScan, topic: /SRF08_8, marking: true, clearing: true}

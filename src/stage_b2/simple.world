@@ -1,0 +1,54 @@
+# simple.world - basic world file example
+# Authors: Richard Vaughan
+# $Id$
+
+include "pioneer.inc"
+include "map.inc"
+include "sick.inc"
+include "dacep.inc"
+
+# time to pause (in GUI mode) or quit (in headless mode (-g)) the simulation
+quit_time 3600 # 1 hour of simulated time
+
+paused 0
+
+resolution 0.02
+
+# configure the GUI window
+window
+(
+  size [ 635 666 ] # in pixels
+  scale 248.884   # pixels per meter
+  center [ 1.901  2.107 ]
+  rotate [ 0.000  -0.500 ]
+            
+  show_data 1              # 1=on 0=off
+)
+
+# load an environment bitmap
+floorplan
+( 
+  name "cave"
+  size [9.680 9.680 0.800]
+  pose [4.840 4.840 0.000 0.000]
+  bitmap "/home/korys/catkin_navib2/maps/map_actual.pgm"
+  gui_nose 1
+)
+
+dacep
+(         
+  # can refer to the robot by this name
+  name "dacep"
+  pose [ 2.000 2.000 0.000 45.000 ] 
+
+  # pioneer2dx's sonars will be ranger:0 and the laser will be ranger:1
+  #sicklaser( pose [ 0 0 0 0 ] ) 
+ 
+  # demonstrate a plugin controller, implemented in examples/ctrl/wander.cc
+  # you probably should comment this out when using simple.cfg with Player
+  #ctrl "wander"
+
+  # report error-free position in world coordinates
+  #localization "gps"
+  #localization_origin [ 0 0 0 0 ]
+)

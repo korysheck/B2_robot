@@ -1,0 +1,88 @@
+<launch>        
+    <!-- ********** Read robot model ********** -->
+    <arg name="model" default="/home/korys/catkin_navib2/src/model_b2/urdf/dacep.urdf" />
+    <arg name="gui" default="False" />
+    <param name="robot_description" textfile="$(arg model)" />
+    <param name="use_gui" value="$(arg gui)"/>
+    
+    <!-- ********** Stage ********** -->
+    <node name="Stage" pkg="stage_ros" type="stageros" args="/home/korys/catkin_navib2/src/stage_b2/simple.world">
+        <remap from="/base_scan_0" to="/scan" />
+    </node>
+    <!-- Premapovani sonaru ze stage na laserscan v potrebnych topicich SRF08_X -->
+    <node name="sonar2lasescan" pkg="dacep" type="sonar2lasescan.py" />
+    
+    <!-- ********** State publisher, tf ********** -->
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+        <param name="rate" value="10" />
+    </node> 
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher">
+        <param name="publish_frequency" value="10.0" />
+    </node>
+
+    <!-- ********** Map server ********** -->  
+    <node name="map_view" pkg="map_server" type="map_server" args="/home/korys/catkin_navib2/maps/map_actual.yaml" >      
+        <param name="frame_id" value="map_view" />
+    </node>
+    
+    <!-- TF -->
+    <node name="map_publisher" pkg="robot_setup_tf" type="map_publisher" />
+      
+    <!-- ********** AMCL ********** :probabilistic localization system for a robot moving in 2D-->
+    <node pkg="amcl" type="amcl" name="amcl" output="screen">  
+          
+        <!-- Publish scans from best pose at a max of 10 Hz -->
+        <rosparam file="$(find navigace)/amcl_params.yaml" command="load"/>
+        <param name="initial_pose_x" value="2.5"/>
+        <param name="initial_pose_y" value="2.5"/>
+        <param name="initial_pose_a" value="0.7854"/> 
+        
+    </node>
+    
+    <!-- ********** MOVE BASE ********** -->
+    <node pkg="move_base" type="move_base" name="move_base">
+        
+        <!-- ********** GLOBAL PLANNER ********** :global_planner/GlobalPlanner, carrot_planner/CarrotPlanner, voronoi_planner/VoronoiPlanner ... defaultne pouzije posledni pouzity  -->
+        <param name="base_global_planner" value="global_planner/GlobalPlanner"/>
+        <param name="planner_frequency" value="1.0" />
+		<param name="planner_patience" value="5.0" />
+        
+        <!-- ********** LOCAL PLANNER ********** :dwa_local_planner/DWAPlannerROS, teb_local_planner/TebLocalPlannerROS-->
+        <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
+        <param name="controller_frequency" value="5.0" />
+		<param name="controller_patience" value="15.0" />
+        <param name="clearing_rotation_allowed" value="false" />
+    
+        <!--rosparam file="$(find navigace)/config/costmap_common_params.yaml" command="load" ns="global_costmap"/-->
+        <!--rosparam file="$(find navigace)/config/costmap_common_params.yaml" command="load" ns="local_costmap" /-->
+        <rosparam file="$(find navigace)/config/local_costmap_params_test.yaml" command="load" />
+        <rosparam file="$(find navigace)/config/global_costmap_params_test.yaml" command="load" />
+        <!--<rosparam file="$(find navigace)/config/base_local_planner_params.yaml" command="load" />-->
+        <rosparam file="$(find navigace)/config/dwa_local_planner_test.yaml" command="load" />
+        <rosparam file="$(find navigace)/config/teb_local_planner_params_b2.yaml" command="load" />
+        
+    </node>
+  
+    <!--node name="recovery" pkg="dacep" type="04_bender_recovery.py" /-->
+  
+    <!-- DATA LOG
+    <node pkg="rosbag" type="record" name="rosbag_record"
+       args="-o bag/amcl 
+          /voltage /current /enk_actual
+          /move_base/global_costmap/footprint /move_base/goal /move_base/local_costmap/costmap 
+          /scan /srf08_1 /srf08_2 /srf08_3 /srf08_4 /srf08_5 /srf08_6 /srf08_7 /srf08_8 
+          /tf /tf_static 
+          /speed_requested_actual /speed_actual 
+          /odom 
+          /move_base/local_costmap/footprint /move_base/DWAPlannerROS/global_plan /move_base/result /move_base/status 
+          /map_metadata /map /joint_states 
+      /bumperStatus
+      /environment_humidity_top /environment_temperature_top 
+          /error /amcl_pose /diagnostics /rosout 
+      /usb_cam_panorama/image_raw/compressed_log" />
+    -->
+    
+    <!-- ********** RVIZ ********** -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d /home/korys/catkin_navib2/rviz_config.rviz"/>
+   
+</launch>

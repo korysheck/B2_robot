@@ -1,0 +1,8 @@
+cd ~/catkin_navidacep/src/dacep/launch
+roslaunch dacep-amcl.launch
+
+nebo
+
+roslaunch dacep dacep-amcl.launch
+
+

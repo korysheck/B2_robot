@@ -1,0 +1,131 @@
+<launch>        
+    <!-- Read robot model -->
+    <arg name="model" default="/home/korys/catkin_ws/src/model/urdf/dacep.urdf" />
+    <arg name="gui" default="False" />
+    <param name="robot_description" textfile="$(arg model)" />
+    <param name="use_gui" value="$(arg gui)"/>
+    
+    <!-- Stage -->
+    <node name="Stage" pkg="stage_ros" type="stageros" args="/home/korys/catkin_ws/src/stage/simple.world">
+        <remap from="/base_scan_0" to="/scan" />
+    </node>
+    <!-- Premapovani sonaru ze stage na laserscan v potrebnych topicich SRF08_X -->
+    <node name="sonar2lasescan" pkg="beginner_tutorials" type="sonar2lasescan.py" />
+        
+    <!-- State publisher, tf -->
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+        <param name="rate" value="10" />
+    </node> 
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher">
+        <param name="publish_frequency" value="10.0" />
+    </node>
+
+    <!-- Map server -->  
+    <node name="map_view" pkg="map_server" type="map_server" args="/home/korys/catkin_ws/maps/map_actual.yaml" >      
+        <param name="frame_id" value="map_view" />
+    </node>
+    
+    <!-- TF -->
+    <node name="map_publisher" pkg="robot_setup_tf" type="map_publisher" />
+  
+    <!-- AMCL -->
+    <node pkg="amcl" type="amcl" name="amcl" output="screen">        
+        <!-- Publish scans from best pose at a max of 10 Hz -->
+                
+        <param name="initial_pose_x" value="5.88462686539"/>
+        <param name="initial_pose_y" value="6.2906126976"/>
+        <param name="initial_pose_a" value="1.53"/>         
+        
+        <param name="odom_model_type" value="diff"/>
+        <param name="odom_alpha1" value="0.1" />
+        <param name="odom_alpha2" value="0.1"/>
+        <param name="odom_alpha3" value="0.1"/>
+        <param name="odom_alpha4" value="0.1"/>         
+        <!--param name="odom_alpha5" value="0.1"/-->
+        
+        <param name="odom_frame_id" value="odom"/>
+        <param name="base_frame_id" type="str" value="base_link" />
+        <param name="global_frame_id" type="str" value="map" />
+                
+        <param name="gui_publish_rate" value="10.0"/>
+        <param name="laser_max_beams" value="30"/>
+        
+        
+        <param name="min_particles" value="100"/>
+        <param name="max_particles" value="5000"/>      
+        
+        <param name="kld_err" value="0.01"/>
+        <param name="kld_z" value="0.99"/>
+        <param name="transform_tolerance" value="0.2" />
+        
+        <param name="update_min_d" value="0.25"/>
+        <param name="update_min_a" value="0.3"/>
+        
+        <param name="resample_interval" value="2"/>
+        
+        <param name="laser_z_hit" value="0.5"/>
+        <param name="laser_z_short" value="0.05"/>
+        <param name="laser_z_max" value="0.05"/>
+        <param name="laser_z_rand" value="0.5"/>
+        <param name="laser_sigma_hit" value="0.2"/>
+        <param name="laser_lambda_short" value="0.1"/>
+        <param name="laser_model_type" value="likelihood_field_prob"/>
+        <!-- <param name="laser_model_type" value="beam"/> -->
+        <param name="laser_likelihood_max_dist" value="2.0"/>
+                                
+        <param name="recovery_alpha_slow" value="0.0"/>
+        <param name="recovery_alpha_fast" value="0.0"/>
+        
+        <param name="use_map_topic" value="true" />
+        <param name="first_map_only" value="true" />
+    </node>
+    
+    <!-- MOVE BASE -->
+    <node pkg="move_base" type="move_base" name="move_base">
+        
+        <!-- GLOBAL PLANNER: global_planner/GlobalPlanner, Carrot planner, voronoi_planner/VoronoiPlanner, ... defaultne pouzije posledni pouzity  -->
+        <param name="base_global_planner" value="voronoi_planner/VoronoiPlanner"/>
+        <!-- VORONOI -->
+        
+        <param name="controller_frequency" value="5.0" />
+        <param name="controller_patience" value="15.0" />
+        <param name="planner_frequency" value="2.0" />
+        <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
+        <param name="clearing_rotation_allowed" value="false" />
+    
+        <!--rosparam file="$(find navigace)/config/costmap_common_params.yaml" command="load" ns="global_costmap"/-->
+        <!--rosparam file="$(find navigace)/config/costmap_common_params.yaml" command="load" ns="local_costmap" /-->
+        <rosparam file="$(find navigace)/config/local_costmap_params_test.yaml" command="load" />
+        <rosparam file="$(find navigace)/config/global_costmap_params_test.yaml" command="load" />
+        <!--<rosparam file="$(find navigace)/config/base_local_planner_params.yaml" command="load" />-->
+        <rosparam file="$(find navigace)/config/dwa_local_planner_test.yaml" command="load" />
+        
+        <!-- VORONOI -->
+        <!--param name="global_costmap/width" value="35.0" if="$(arg no_static_map)"/-->
+        <!--param name="global_costmap/height" value="35.0" if="$(arg no_static_map)"/-->
+        <!-- VORONOI -->
+    </node>
+  
+    <!--node name="recovery" pkg="dacep" type="04_bender_recovery.py" /-->
+  
+    <!-- DATA LOG
+    <node pkg="rosbag" type="record" name="rosbag_record"
+       args="-o bag/amcl 
+          /voltage /current /enk_actual
+          /move_base/global_costmap/footprint /move_base/goal /move_base/local_costmap/costmap 
+          /scan /srf08_1 /srf08_2 /srf08_3 /srf08_4 /srf08_5 /srf08_6 /srf08_7 /srf08_8 
+          /tf /tf_static 
+          /speed_requested_actual /speed_actual 
+          /odom 
+          /move_base/local_costmap/footprint /move_base/DWAPlannerROS/global_plan /move_base/result /move_base/status 
+          /map_metadata /map /joint_states 
+      /bumperStatus
+      /environment_humidity_top /environment_temperature_top 
+          /error /amcl_pose /diagnostics /rosout 
+      /usb_cam_panorama/image_raw/compressed_log" />
+    -->
+    
+    <!-- RVIZ -->
+    <node name="rviz" pkg="rviz" type="rviz" />
+   
+</launch>
